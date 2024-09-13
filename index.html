@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Serial Port Plotter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .videomap {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: row;
+        }
+
+        .video,
+        .map-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+
+        }
+
+        .video video {
+            width: 90%;
+            height: auto;
+            max-width: 640px;
+            max-height: 480px;
+            border: 2px solid white ;
+        }
+
+        .map-container {
+            width: 90%;
+            height: 90%;
+            border: 2px solid white ;
+
+        }
+
+        #map {
+            width: 90%;
+            height: 90%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="assets/logo.png" alt="Application Logo" id="app-logo">
+        <h1>GRAPHICAL USER INTERFACE</h1>
+
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#" id="home-button">Home</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Charts</a>
+                <div class="dropdown-content">
+                    <a href="#" class="chart-link" data-chart="gyro">Gyroscope</a>
+                    <a href="#" class="chart-link" data-chart="accel">Accelerometer</a>
+                    <a href="#" class="chart-link" data-chart="temp">Temperature</a>
+                    <a href="#" class="chart-link" data-chart="altitude">Altitude</a>
+                    <a href="#" class="chart-link" data-chart="pressure">Pressure</a>
+                    <a href="#" class="chart-link" data-chart="humidity">Humidity</a>
+                    <a href="#" class="chart-link" data-chart="AQI">AQI</a>
+                    <a href="#" class="chart-link" data-chart="smoke">Smoke</a>
+                    <a href="#" class="chart-link" data-chart="speed">Speed</a>
+                    <a href="#" class="chart-link" data-chart="latlon">Latitude-Longitude</a>
+                    <a href="#" class="chart-link" data-chart="CO">CO</a>
+
+                </div>
+            </li>
+        </ul>
+    </nav>
+    <main>
+        <div id="controls">
+            <select id="port-select"></select>
+            <button id="connect-button">Connect</button>
+            <button id="export-button">Export Data</button>
+        </div>
+        <div id="error-message" style="display: none; color: red;"></div>
+        <div id="loading-indicator" class="hidden">Loading...</div>
+        <div id="data-display-container">
+            <div id="gyro-display" class="data-display">Waiting for gyro data...</div>
+            <div id="accel-display" class="data-display">Waiting for accelerometer data...</div>
+            <div id="temp-display" class="data-display">Waiting for temperature data...</div>
+        </div>
+        <div id="charts-container">
+            <div id="top-charts">
+                <div class="chart-wrapper">
+                    <canvas id="gyro-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="accel-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="temp-chart"></canvas>
+                </div>
+            </div>
+            <div id="data-display-container">
+                <div id="altitude-display" class="data-display">Waiting for altitude data...</div>
+                <div id="pressure-display" class="data-display">Waiting for pressure data...</div>
+                <div id="humidity-display" class="data-display">Waiting for humidity data...</div>
+            </div>
+            
+            <div class="bottom-charts">
+                <div class="chart-wrapper">
+                    <canvas id="altitude-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="pressure-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="humidity-chart"></canvas>
+                </div>
+            </div>
+            <div id="data-display-container">
+                <div id="gyro-display" class="data-display">Waiting for AQI data...</div>
+                <div id="accel-display" class="data-display">Waiting for Smoke data...</div>
+                <div id="temp-display" class="data-display">Waiting for Speed data...</div>
+            </div>
+            <div class="bottom-charts">
+                <div class="chart-wrapper">
+                    <canvas id="AQI-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="smoke-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="speed-chart"></canvas>
+                </div>
+            </div>
+            <div id="data-display-container">
+
+                <div id="CO-display" class="data-display">Waiting for CO data...</div>
+                <div id="latlon-display" class="data-display">Waiting for Latitude-Longitude data...</div>
+            </div>
+            
+            <div class="bottom-charts">
+                <div class="chart-wrapper">
+                    <canvas id="CO-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="latlon-chart"></canvas>
+                </div>
+            </div>
+                <!-- <span class="name">
+                    Video -->
+                <!-- </span> -->
+                <!-- <span>MAP</span> -->
+                <div id="data-display-container">
+
+                    <div id="CO-display" class="data-display">Video Feed</div>
+                    <div id="latlon-display" class="data-display">World Map View</div>
+                </div>
+                <div class="videomap">
+                    <div class="video">
+                        <video id="video-feed" autoplay></video>
+                    </div>
+                    <div class="map-container">
+                        <div id="map"></div>
+                    </div>
+            </div>
+            <!-- <div class="videomap">
+                <div class="video">
+                    <video id="video-feed" width="100%" height="100%" autoplay></video>
+                </div>
+                <div class="map-container">
+                    <div id="map">map</div>
+                </div>
+            </div> -->
+
+            <!-- <div class="videomap">
+                <div class="video">Waiting for Video Feed</div>
+                
+                <div class="video">
+                    <video id="video-feed" width="640" height="480" autoplay></video>
+                </div>
+                <div class="map-container">
+                    <div class="map">MAP</div>
+                </div>
+            </div> -->
+        </div>
+        </div>
+    </main>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="renderer.js"></script>
+    <script src="script.js"></script>
+    
+</body>
+</html>
